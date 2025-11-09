@@ -45,6 +45,9 @@ The system includes data preprocessing, feature engineering, model benchmarking,
 
 <p align="center">
   <img src="1.png" width="40%">
+</p>
+
+<p align="center">
   <img src="2.png" width="40%">
 </p>
 
