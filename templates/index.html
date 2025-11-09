@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌊 Tsunami Prediction System</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <style>
+        :root {
+            --primary-yellow: #FFD700;
+            --dark-yellow: #FFC107;
+            --light-brown: #8B4513;
+            --dark-brown: #654321;
+            --cream: #FFF8DC;
+            --gold: #D4AF37;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary-yellow) 0%, var(--light-brown) 100%);
+            min-height: 100vh;
+            color: var(--dark-brown);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 1s ease;
+        }
+        
+        .logo {
+            font-size: 4rem;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+        }
+        
+        .title {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--dark-brown);
+            text-shadow: 2px 2px 4px rgba(255,255,255,0.5);
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--dark-brown);
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .input-section {
+            background: rgba(255, 248, 220, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(139, 69, 19, 0.3);
+            border: 3px solid var(--gold);
+        }
+        
+        .output-section {
+            background: rgba(255, 248, 220, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(139, 69, 19, 0.3);
+            border: 3px solid var(--gold);
+            min-height: 600px;
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            color: var(--dark-brown);
+            margin-bottom: 25px;
+            text-align: center;
+            border-bottom: 3px solid var(--gold);
+            padding-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark-brown);
+            font-size: 1.1rem;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--dark-yellow);
+            border-radius: 10px;
+            font-size: 1rem;
+            background: white;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--light-brown);
+            box-shadow: 0 0 10px rgba(139, 69, 19, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .model-selector {
+            background: var(--gold);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .model-select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid var(--dark-brown);
+            border-radius: 8px;
+            background: white;
+            font-weight: bold;
+        }
+        
+        .predict-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--light-brown), var(--dark-brown));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .predict-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(139, 69, 19, 0.4);
+        }
+        
+        .predict-btn:active {
+            transform: translateY(-1px);
+        }
+        
+        .result-container {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .risk-gauge {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 30px;
+            position: relative;
+        }
+        
+        .probability-display {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 20px 0;
+            color: var(--dark-brown);
+        }
+        
+        .risk-level {
+            font-size: 2rem;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 10px;
+            margin: 20px auto;
+            display: inline-block;
+        }
+        
+        .risk-high {
+            background: #ff4444;
+            color: white;
+            animation: pulse 2s infinite;
+        }
+        
+        .risk-medium {
+            background: #ffaa00;
+            color: white;
+        }
+        
+        .risk-low {
+            background: #00C851;
+            color: white;
+        }
+        
+        .insights-list {
+            text-align: left;
+            margin-top: 30px;
+        }
+        
+        .insight-item {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border-left: 4px solid var(--gold);
+            animation: slideInRight 0.5s ease;
+        }
+        
+        .confidence-meter {
+            background: linear-gradient(90deg, #00C851, #ffaa00, #ff4444);
+            height: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            background: var(--dark-brown);
+            border-radius: 10px;
+            transition: width 1s ease;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--gold);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        .earthquake-icon {
+            font-size: 2rem;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: var(--dark-brown);
+            opacity: 0.8;
+        }
+        
+        .parameter-highlight {
+            background: rgba(255, 215, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🌊</div>
+            <h1 class="title">Tsunami Prediction System</h1>
+            <p class="subtitle">Advanced Machine Learning for Tsunami Risk Assessment</p>
+        </div>
+        
+        <div class="main-content">
+            <!-- Input Section -->
+            <div class="input-section">
+                <h2 class="section-title">📊 Earthquake Parameters</h2>
+                
+                <div class="model-selector">
+                    <label class="form-label">🤖 Prediction Model:</label>
+                    <select class="model-select" id="modelSelect">
+                        <option value="Random Forest">Random Forest</option>
+                        <option value="XGBoost">XGBoost</option>
+                        <option value="Gradient Boosting">Gradient Boosting</option>
+                        <option value="Neural Network (MLP)">Neural Network (MLP)</option>
+                        <option value="Logistic Regression">Logistic Regression</option>
+                    </select>
+                </div>
+                
+                <form id="predictionForm">
+                    <div class="input-grid">
+                        <div class="form-group">
+                            <label class="form-label">🌋 Magnitude (6.5-9.1)</label>
+                            <input type="number" class="form-input" id="magnitude" name="magnitude" 
+                                   min="6.5" max="9.1" step="0.1" value="7.5" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">⛰️ Depth km (2.7-670.8)</label>
+                            <input type="number" class="form-input" id="depth" name="depth" 
+                                   min="2.7" max="670.8" step="0.1" value="35.0" required>
+                        </div>
+                    </div>
+                    
+                    <div class="input-grid">
+                        <div class="form-group">
+                            <label class="form-label">📈 Significance (650-2910)</label>
+                            <input type="number" class="form-input" id="sig" name="sig" 
+                                   min="650" max="2910" value="1200" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">💥 MMI Intensity (1-9)</label>
+                            <input type="number" class="form-input" id="mmi" name="mmi" 
+                                   min="1" max="9" value="6" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">🏘️ CDI Intensity (0-9)</label>
+                        <input type="number" class="form-input" id="cdi" name="cdi" 
+                               min="0" max="9" value="5" required>
+                    </div>
+                    
+                    <div class="input-grid">
+                        <div class="form-group">
+                            <label class="form-label">📍 Latitude (-61.85 to 71.63)</label>
+                            <input type="number" class="form-input" id="latitude" name="latitude" 
+                                   min="-61.85" max="71.63" step="0.01" value="35.0" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">📍 Longitude (-179.97 to 179.66)</label>
+                            <input type="number" class="form-input" id="longitude" name="longitude" 
+                                   min="-179.97" max="179.66" step="0.01" value="140.0" required>
+                        </div>
+                    </div>
+                    
+                    <div class="input-grid">
+                        <div class="form-group">
+                            <label class="form-label">📡 Seismic Stations (0-934)</label>
+                            <input type="number" class="form-input" id="nst" name="nst" 
+                                   min="0" max="934" value="150" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">📏 Station Distance (0.0-17.7)</label>
+                            <input type="number" class="form-input" id="dmin" name="dmin" 
+                                   min="0.0" max="17.7" step="0.1" value="2.5" required>
+                        </div>
+                    </div>
+                    
+                    <div class="input-grid">
+                        <div class="form-group">
+                            <label class="form-label">📐 Azimuthal Gap (0.0-239.0)</label>
+                            <input type="number" class="form-input" id="gap" name="gap" 
+                                   min="0.0" max="239.0" step="0.1" value="45.0" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">📅 Month (1-12)</label>
+                            <input type="number" class="form-input" id="month" name="month" 
+                                   min="1" max="12" value="6" required>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="predict-btn">
+                        🌊 PREDICT TSUNAMI RISK
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Output Section -->
+            <div class="output-section">
+                <h2 class="section-title">🎯 Prediction Results</h2>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Analyzing earthquake data...</p>
+                </div>
+                
+                <div class="result-container" id="resultContainer" style="display: none;">
+                    <div class="risk-gauge">
+                        <canvas id="riskGauge"></canvas>
+                    </div>
+                    
+                    <div class="probability-display" id="probabilityDisplay">
+                        0%
+                    </div>
+                    
+                    <div class="risk-level" id="riskLevel">
+                        CALCULATING...
+                    </div>
+                    
+                    <div class="confidence-meter">
+                        <div class="confidence-fill" id="confidenceFill" style="width: 0%;"></div>
+                    </div>
+                    <p>Model Confidence: <span id="confidenceValue">0%</span></p>
+                    
+                    <div class="model-info">
+                        <p>🤖 Model: <span id="modelUsed">Random Forest</span></p>
+                    </div>
+                    
+                    <div class="insights-list" id="insightsList">
+                        <!-- Insights will be populated here -->
+                    </div>
+                </div>
+                
+                <div class="placeholder" id="placeholder">
+                    <div style="text-align: center; padding: 60px 20px; color: #666;">
+                        <div style="font-size: 4rem; margin-bottom: 20px;">🌋</div>
+                        <h3>Enter Earthquake Parameters</h3>
+                        <p>Fill in the form and click "Predict Tsunami Risk" to see results</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>🌊 Tsunami Prediction System | Advanced Machine Learning | © 2025</p>
+            <p>Presented By SAFWAN UL ISLAM.</p>
+        </div>
+    </div>
+
+    <script>
+        // Initialize chart
+        let riskChart;
+        
+        document.getElementById('predictionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            predictTsunami();
+        });
+        
+        function predictTsunami() {
+            const form = document.getElementById('predictionForm');
+            const formData = new FormData(form);
+            const model = document.getElementById('modelSelect').value;
+            formData.append('model', model);
+            
+            // Show loading, hide results and placeholder
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('resultContainer').style.display = 'none';
+            document.getElementById('placeholder').style.display = 'none';
+            
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loading').style.display = 'none';
+                
+                if (data.success) {
+                    displayResults(data.result, data.input_data);
+                } else {
+                    alert('Error: ' + data.error);
+                    document.getElementById('placeholder').style.display = 'block';
+                }
+            })
+            .catch(error => {
+                document.getElementById('loading').style.display = 'none';
+                alert('Network error: ' + error);
+                document.getElementById('placeholder').style.display = 'block';
+            });
+        }
+        
+        function displayResults(result, inputData) {
+            // Show result container
+            document.getElementById('resultContainer').style.display = 'block';
+            document.getElementById('placeholder').style.display = 'none';
+            
+            // Update probability and risk level
+            const probability = result.probability;
+            document.getElementById('probabilityDisplay').textContent = 
+                (probability * 100).toFixed(1) + '%';
+            
+            const riskLevel = document.getElementById('riskLevel');
+            riskLevel.textContent = result.risk_level;
+            riskLevel.className = 'risk-level ';
+            
+            if (result.risk_level === 'HIGH RISK') {
+                riskLevel.classList.add('risk-high');
+            } else if (result.risk_level === 'MEDIUM RISK') {
+                riskLevel.classList.add('risk-medium');
+            } else {
+                riskLevel.classList.add('risk-low');
+            }
+            
+            // Update confidence
+            document.getElementById('confidenceValue').textContent = result.confidence + '%';
+            document.getElementById('confidenceFill').style.width = result.confidence + '%';
+            
+            // Update model info
+            document.getElementById('modelUsed').textContent = result.model_used;
+            
+            // Update insights
+            const insightsList = document.getElementById('insightsList');
+            insightsList.innerHTML = '';
+            
+            if (result.insights && result.insights.length > 0) {
+                result.insights.forEach(insight => {
+                    const insightItem = document.createElement('div');
+                    insightItem.className = 'insight-item';
+                    insightItem.textContent = insight;
+                    insightsList.appendChild(insightItem);
+                });
+            }
+            
+            // Update gauge chart
+            updateRiskGauge(probability);
+            
+            // Add animations
+            anime({
+                targets: '.insight-item',
+                translateX: [50, 0],
+                opacity: [0, 1],
+                delay: anime.stagger(100)
+            });
+        }
+        
+        function updateRiskGauge(probability) {
+            const ctx = document.getElementById('riskGauge').getContext('2d');
+            
+            if (riskChart) {
+                riskChart.destroy();
+            }
+            
+            riskChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [probability, 1 - probability],
+                        backgroundColor: [
+                            probability > 0.7 ? '#ff4444' : probability > 0.4 ? '#ffaa00' : '#00C851',
+                            '#f0f0f0'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    cutout: '70%',
+                    rotation: -90,
+                    circumference: 180,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false }
+                    },
+                    animation: {
+                        animateRotate: true,
+                        animateScale: true
+                    }
+                }
+            });
+        }
+        
+        // Initialize with some sample data
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create initial gauge
+            const ctx = document.getElementById('riskGauge').getContext('2d');
+            riskChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [0, 1],
+                        backgroundColor: ['#f0f0f0', '#f0f0f0'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    cutout: '70%',
+                    rotation: -90,
+                    circumference: 180,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
