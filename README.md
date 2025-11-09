@@ -42,6 +42,12 @@ The system includes data preprocessing, feature engineering, model benchmarking,
 
 ## 🏆 Model Performance (Top Models)
 
+
+<p align="center">
+  <img src="1.png" width="40%">
+  <img src="2.png" width="40%">
+</p>
+
 | Model | Accuracy | Balanced Accuracy | F1-Score | ROC-AUC | MCC |
 |------|---------|------------------|---------|---------|-----|
 | **Gradient Boosting** | **0.9108** | **0.9092** | **0.8871** | **0.9549** | **0.8137** |
